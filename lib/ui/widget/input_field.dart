@@ -10,6 +10,7 @@ class InputField extends StatelessWidget {
     this.textInputType,
     this.validator,
     this.maxLine,
+    this.onTap,
   });
 
   final TextEditingController controller;
@@ -19,6 +20,7 @@ class InputField extends StatelessWidget {
   final TextInputType? textInputType;
   final String? Function(String?)? validator;
   final int? maxLine;
+  final void Function()? onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +33,8 @@ class InputField extends StatelessWidget {
       keyboardType: textInputType ?? TextInputType.none,
       cursorColor: Theme.of(context).primaryColor,
       validator: validator,
+      onTap: onTap,
+      readOnly: onTap != null ? true : false,
     );
   }
 }

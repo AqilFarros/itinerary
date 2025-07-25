@@ -15,6 +15,20 @@ class _AddAgendaState extends State<AddAgenda> {
   final TextEditingController descriptionController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
+  void _selectDate(TextEditingController controller) async {
+    DateTime? picked = await showDatePicker(
+      context: context,
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
+    );
+
+    if (picked != null) {
+      setState(() {
+        controller.text = Helper.formatDate(picked);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -67,6 +81,9 @@ class _AddAgendaState extends State<AddAgenda> {
                     hint: "15 December 2022",
                     textInputType: TextInputType.name,
                     validator: InputValidator.requiredField,
+                    onTap: () {
+                      _selectDate(dateController);
+                    },
                   ),
                   SizedBox(height: AppTheme.defaultMargin),
                   InputField(

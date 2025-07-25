@@ -15,6 +15,23 @@ class _AddIteneraryPageState extends State<AddIteneraryPage> {
   final TextEditingController descriptionController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
+  void _selectDate(
+    TextEditingController controller, {
+    DateTime? firstDate,
+  }) async {
+    DateTime? picked = await showDatePicker(
+      context: context,
+      firstDate: firstDate ?? DateTime.now(),
+      lastDate: DateTime(2100),
+    );
+
+    if (picked != null) {
+      setState(() {
+        controller.text = Helper.formatDate(picked);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -62,6 +79,9 @@ class _AddIteneraryPageState extends State<AddIteneraryPage> {
                           hint: "15 December 2022",
                           textInputType: TextInputType.name,
                           validator: InputValidator.requiredField,
+                          onTap: () {
+                            _selectDate(fromController);
+                          },
                         ),
                       ),
                       SizedBox(width: AppTheme.defaultMargin),
@@ -71,6 +91,26 @@ class _AddIteneraryPageState extends State<AddIteneraryPage> {
                           label: "To",
                           hint: "16 December 2022",
                           validator: InputValidator.requiredField,
+                          onTap: () {
+                            if (fromController.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    "Please select from date first",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall!
+                                        .copyWith(color: Colors.white),
+                                  ),
+                                ),
+                              );
+                            } else {
+                              _selectDate(
+                                toController,
+                                firstDate: Helper.formatDateToISO8601(fromController.text),
+                              );
+                            }
+                          },
                         ),
                       ),
                     ],

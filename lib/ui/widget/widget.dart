@@ -9,3 +9,4 @@ part 'title_widget.dart';
 part 'event_card.dart';
 part 'itinerary_card.dart';
 part 'activity_card.dart';
+part 'swipe_to_delete_routine.dart';

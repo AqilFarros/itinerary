@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "510402933733",
+    "project_id": "etinerary-ff16a",
+    "storage_bucket": "etinerary-ff16a.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:510402933733:android:24bbd248fdc24c35b2b50c",
+        "android_client_info": {
+          "package_name": "com.example.itinerary"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDv59k2rpWIclx-lJqx_Hlro0o42k1OPoU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

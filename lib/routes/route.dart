@@ -18,6 +18,8 @@ class RouteGenerator {
         return MaterialPageRoute(builder: (_) => AddIteneraryPage());
       case '/add-agenda':
         return MaterialPageRoute(builder: (_) => AddAgenda());
+      case '/daily-routine':
+        return MaterialPageRoute(builder: (_) => DailyRoutinePage());
       default:
         return _errorRoute();
     }

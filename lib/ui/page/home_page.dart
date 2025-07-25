@@ -70,14 +70,19 @@ class HomePage extends StatelessWidget {
                 ),
                 SizedBox(height: AppTheme.defaultMargin * 2),
                 TitleWidget(text: "My Daily Routine"),
-                CarouselSlider(
-                  options: CarouselOptions(
-                    autoPlay: true,
-                    height: 110,
-                    enlargeCenterPage: true,
-                    enableInfiniteScroll: false,
+                GestureDetector(
+                  onTap: () {
+                    Navigator.pushNamed(context, '/daily-routine');
+                  },
+                  child: CarouselSlider(
+                    options: CarouselOptions(
+                      autoPlay: true,
+                      height: 110,
+                      enlargeCenterPage: true,
+                      enableInfiniteScroll: false,
+                    ),
+                    items: imageSliders,
                   ),
-                  items: imageSliders,
                 ),
                 SizedBox(height: AppTheme.defaultMargin * 2),
                 TitleWidget(text: "My Upcoming Event"),

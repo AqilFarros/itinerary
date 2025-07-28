@@ -4,7 +4,7 @@ class RoutineService {
   final firestore = FirebaseFirestore.instance;
   String userId = AuthService().auth.currentUser!.uid;
 
-  Stream<QuerySnapshot>? getRoutine() {
+  Stream<QuerySnapshot> getRoutine() {
     return firestore
         .collection('users')
         .doc(userId)

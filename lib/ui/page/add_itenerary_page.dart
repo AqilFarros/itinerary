@@ -13,7 +13,45 @@ class _AddIteneraryPageState extends State<AddIteneraryPage> {
   final TextEditingController fromController = TextEditingController();
   final TextEditingController toController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
+  final itinerary = ItineraryService();
   final formKey = GlobalKey<FormState>();
+  bool isLoading = false;
+
+  void addItinerary() async {
+    if (formKey.currentState!.validate()) {
+      try {
+        setState(() {
+          isLoading = true;
+        });
+
+        await itinerary.addItenerary(
+          place: nameController.text,
+          description: descriptionController.text,
+          from: fromController.text,
+          to: toController.text,
+          type: typeController.text,
+        );
+
+        if (!mounted) return;
+        Navigator.pop(context);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              e.toString(),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall!.copyWith(color: Colors.white),
+            ),
+          ),
+        );
+      } finally {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
 
   void _selectDate(
     TextEditingController controller, {
@@ -107,7 +145,9 @@ class _AddIteneraryPageState extends State<AddIteneraryPage> {
                             } else {
                               _selectDate(
                                 toController,
-                                firstDate: Helper.formatDateToISO8601(fromController.text),
+                                firstDate: Helper.formatDateToISO8601(
+                                  fromController.text,
+                                ),
                               );
                             }
                           },
@@ -145,7 +185,7 @@ class _AddIteneraryPageState extends State<AddIteneraryPage> {
                       SizedBox(width: AppTheme.defaultMargin),
                       ElevatedButton(
                         onPressed: () {
-                          if (formKey.currentState!.validate()) {}
+                          addItinerary();
                         },
                         child: Text(
                           "Add",

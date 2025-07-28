@@ -10,6 +10,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final authService = AuthService();
   final dailyRoutine = RoutineService();
+  final itinerary = ItineraryService();
+  final agenda = AgendaService();
   late Future<Map<String, dynamic>> user;
 
   @override
@@ -128,12 +130,16 @@ class _HomePageState extends State<HomePage> {
                             enlargeCenterPage: true,
                             enableInfiniteScroll: false,
                           ),
-                          items: snapshot.data!.docs.map((item) => CarouselRoutine(
-                            name: item['name'],
-                            type: item['type'],
-                            start: item['start'],
-                            end: item['end'],
-                          )).toList(),
+                          items: snapshot.data!.docs
+                              .map(
+                                (item) => CarouselRoutine(
+                                  name: item['name'],
+                                  type: item['type'],
+                                  start: item['start'],
+                                  end: item['end'],
+                                ),
+                              )
+                              .toList(),
                         ),
                       );
                     }
@@ -144,8 +150,34 @@ class _HomePageState extends State<HomePage> {
                 SizedBox(height: AppTheme.defaultMargin * 2),
                 TitleWidget(text: "My Upcoming Event"),
                 SizedBox(height: AppTheme.defaultMargin),
-                EventCard(),
-                EventCard(),
+                StreamBuilder(
+                  stream: agenda.getAgenda(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator(color: Colors.white);
+                    }
+
+                    if (snapshot.hasError) {
+                      return Text("Error: ${snapshot.error}");
+                    }
+
+                    if (snapshot.data!.docs.isEmpty) {
+                      return SizedBox();
+                    }
+
+                    if (snapshot.hasData) {
+                      return Column(
+                        children: snapshot.data!.docs
+                            .map(
+                              (item) => EventCard(),
+                            )
+                            .toList(),
+                      );
+                    }
+
+                    return SizedBox();
+                  }
+                ),
                 Container(
                   margin: EdgeInsets.symmetric(
                     horizontal: AppTheme.defaultMargin,
@@ -164,18 +196,46 @@ class _HomePageState extends State<HomePage> {
                 SizedBox(height: AppTheme.defaultMargin),
                 TitleWidget(text: "My Dream Itinerary"),
                 SizedBox(height: AppTheme.defaultMargin),
-                SizedBox(
-                  height: 300,
-                  child: ListView(
-                    shrinkWrap: true,
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      SizedBox(width: AppTheme.defaultMargin),
-                      ItineraryCard(),
-                      ItineraryCard(),
-                      ItineraryCard(),
-                    ],
-                  ),
+                StreamBuilder(
+                  stream: itinerary.getItinerary(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator(color: Colors.white);
+                    }
+
+                    if (snapshot.hasError) {
+                      return Text("Error: ${snapshot.error}");
+                    }
+
+                    if (snapshot.data!.docs.isEmpty) {
+                      return SizedBox();
+                    }
+
+                    if (snapshot.hasData) {
+                      return SizedBox(
+                        height: 300,
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          scrollDirection: Axis.horizontal,
+                          itemCount: snapshot.data!.docs.length,
+                          itemBuilder: (context, index) {
+                            if (index == 0) {
+                              return Container(
+                                margin: EdgeInsets.only(
+                                  left: AppTheme.defaultMargin,
+                                ),
+                                child: ItineraryCard(),
+                              );
+                            } else {
+                              return ItineraryCard();
+                            }
+                          },
+                        ),
+                      );
+                    }
+
+                    return SizedBox();
+                  },
                 ),
                 SizedBox(height: AppTheme.defaultMargin / 2),
                 Container(

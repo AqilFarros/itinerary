@@ -3,6 +3,7 @@ import 'package:itinerary/ui/page/page.dart';
 
 class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
+    final args = settings.arguments as Map<String, dynamic>? ?? {};
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(builder: (_) => WelcomePage());
@@ -17,9 +18,34 @@ class RouteGenerator {
       case '/add-itinerary':
         return MaterialPageRoute(builder: (_) => AddIteneraryPage());
       case '/add-agenda':
-        return MaterialPageRoute(builder: (_) => AddAgenda());
+        return MaterialPageRoute(
+          builder: (_) => AddAgenda(itineraryId: settings.arguments as String),
+        );
       case '/daily-routine':
         return MaterialPageRoute(builder: (_) => DailyRoutinePage());
+      case '/edit-itinerary':
+        return MaterialPageRoute(
+          builder: (_) => EditIteneraryPage(
+            id: args['id'],
+            name: args['name'],
+            type: args['type'],
+            from: args['from'],
+            to: args['to'],
+            description: args['description'],
+          ),
+        );
+      case '/edit-agenda':
+        return MaterialPageRoute(
+          builder: (_) => EditAgenda(
+            itineraryId: args['itineraryId'],
+            agendaId: args['agendaId'],
+            name: args['name'],
+            description: args['description'],
+            type: args['type'],
+            location: args['location'],
+            date: args['date'],
+          ),
+        );
       default:
         return _errorRoute();
     }

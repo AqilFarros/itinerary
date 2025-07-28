@@ -312,11 +312,15 @@ class _DailyRoutinePageState extends State<DailyRoutinePage> {
                       children: snapshot.data!.docs
                           .map(
                             (item) => Container(
+                              key: ValueKey(item.id),
                               margin: EdgeInsets.only(
                                 bottom: AppTheme.defaultMargin,
                               ),
                               child: SwipeToDeleteRoutine(
-                                onDismissed: () {},
+                                key: ValueKey(item.id),
+                                onDismissed: () async {
+                                  await dailyRoutine.deleteRoutine(item.id);
+                                },
                                 child: CarouselRoutine(
                                   name: item['name'],
                                   type: item['type'],

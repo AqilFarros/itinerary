@@ -1,15 +1,29 @@
 part of 'page.dart';
 
-class AddAgenda extends StatefulWidget {
-  const AddAgenda({super.key, required this.itineraryId});
+class EditAgenda extends StatefulWidget {
+  const EditAgenda({
+    super.key,
+    required this.itineraryId,
+    required this.agendaId,
+    required this.name,
+    required this.type,
+    required this.location,
+    required this.date,
+    required this.description,});
 
   final String itineraryId;
+  final String agendaId;
+  final String name;
+  final String type;
+  final String location;
+  final String date;
+  final String description;
 
   @override
-  State<AddAgenda> createState() => _AddAgendaState();
+  State<EditAgenda> createState() => _EditAgendaState();
 }
 
-class _AddAgendaState extends State<AddAgenda> {
+class _EditAgendaState extends State<EditAgenda> {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController typeController = TextEditingController();
   final TextEditingController locationController = TextEditingController();
@@ -19,15 +33,26 @@ class _AddAgendaState extends State<AddAgenda> {
   bool isLoading = false;
   final agenda = AgendaService();
 
-  void addAgenda() async {
+  @override
+  void initState() {
+    nameController.text = widget.name;
+    typeController.text = widget.type;
+    locationController.text = widget.location;
+    dateController.text = widget.date;
+    descriptionController.text = widget.description;
+    super.initState();
+  }
+
+  void editAgenda() async {
     if (formKey.currentState!.validate()) {
       try {
         setState(() {
           isLoading = true;
         });
 
-        await agenda.addAgenda(
-          id: widget.itineraryId,
+        await agenda.updateAgenda(
+          itineraryId: widget.itineraryId,
+          agendaId: widget.agendaId,
           name: nameController.text,
           type: typeController.text,
           place: locationController.text,
@@ -90,7 +115,7 @@ class _AddAgendaState extends State<AddAgenda> {
                   ),
                   SizedBox(height: AppTheme.defaultMargin),
                   Text(
-                    "Add your next agenda",
+                    "Edit agenda",
                     style: Theme.of(context).textTheme.titleLarge,
                   ),
                   SizedBox(height: AppTheme.defaultMargin * 2),
@@ -156,10 +181,10 @@ class _AddAgendaState extends State<AddAgenda> {
                       SizedBox(width: AppTheme.defaultMargin),
                       ElevatedButton(
                         onPressed: () {
-                          addAgenda();
+                          editAgenda();
                         },
                         child: Text(
-                          "Add",
+                          "Updata",
                           style: Theme.of(
                             context,
                           ).textTheme.titleSmall!.copyWith(color: Colors.white),

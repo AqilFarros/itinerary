@@ -1,7 +1,221 @@
 part of 'page.dart';
 
-class ItineraryPage extends StatelessWidget {
+class ItineraryPage extends StatefulWidget {
   const ItineraryPage({super.key});
+
+  @override
+  State<ItineraryPage> createState() => _ItineraryPageState();
+}
+
+class _ItineraryPageState extends State<ItineraryPage> {
+  final itinerary = ItineraryService();
+  final nameController = TextEditingController();
+  final descriptionController = TextEditingController();
+  final fromController = TextEditingController();
+  final toController = TextEditingController();
+  final typeController = TextEditingController();
+  final formKey = GlobalKey<FormState>();
+
+  void _selectDate(
+    TextEditingController controller, {
+    DateTime? firstDate,
+  }) async {
+    DateTime? picked = await showDatePicker(
+      context: context,
+      firstDate: firstDate ?? DateTime.now(),
+      lastDate: DateTime(2100),
+    );
+
+    if (picked != null) {
+      setState(() {
+        controller.text = Helper.formatDate(picked);
+      });
+    }
+  }
+
+  void _updateAgenda() {}
+
+  void _agendaDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                side: BorderSide(color: Theme.of(context).hintColor, width: 1),
+              ),
+              child: Text(
+                "Cancel",
+                style: Theme.of(context).textTheme.titleSmall!,
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {},
+              child: Text(
+                "Update",
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall!.copyWith(color: Colors.white),
+              ),
+            ),
+          ],
+          content: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                children: [
+                  
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _updateItinerary(String id) async {
+    if (formKey.currentState!.validate()) {
+      try {
+        await itinerary.updateItinerary(
+          id: id,
+          place: nameController.text,
+          description: descriptionController.text,
+          from: fromController.text,
+          to: toController.text,
+          type: typeController.text,
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              e.toString(),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall!.copyWith(color: Colors.white),
+            ),
+          ),
+        );
+      }
+    }
+  }
+
+  void _updateDialog(String id) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          actions: [
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.white,
+                side: BorderSide(color: Theme.of(context).hintColor, width: 1),
+              ),
+              child: Text(
+                "Cancel",
+                style: Theme.of(context).textTheme.titleSmall!,
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                _updateItinerary(id);
+              },
+              child: Text(
+                "Update",
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall!.copyWith(color: Colors.white),
+              ),
+            ),
+          ],
+          content: SingleChildScrollView(
+            child: Form(
+              child: Column(
+                children: [
+                  InputField(
+                    controller: nameController,
+                    hint: "ex: Jakarta, Bandung, Bali",
+                    label: "Place",
+                    validator: InputValidator.requiredField,
+                  ),
+                  SizedBox(height: AppTheme.defaultMargin),
+                  InputField(
+                    controller: typeController,
+                    label: "Type",
+                    hint: "ex: family, friends, work",
+                    validator: InputValidator.requiredField,
+                  ),
+                  SizedBox(height: AppTheme.defaultMargin),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: InputField(
+                          controller: fromController,
+                          label: "From",
+                          hint: "15 December 2022",
+                          textInputType: TextInputType.name,
+                          validator: InputValidator.requiredField,
+                          onTap: () {
+                            _selectDate(fromController);
+                          },
+                        ),
+                      ),
+                      SizedBox(width: AppTheme.defaultMargin),
+                      Expanded(
+                        child: InputField(
+                          controller: toController,
+                          label: "To",
+                          hint: "16 December 2022",
+                          validator: InputValidator.requiredField,
+                          onTap: () {
+                            if (fromController.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    "Please select from date first",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall!
+                                        .copyWith(color: Colors.white),
+                                  ),
+                                ),
+                              );
+                            } else {
+                              _selectDate(
+                                toController,
+                                firstDate: Helper.formatDateToISO8601(
+                                  fromController.text,
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: AppTheme.defaultMargin),
+                  InputField(
+                    controller: descriptionController,
+                    label: "Description",
+                    hint: "",
+                    maxLine: 5,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -58,15 +272,20 @@ class ItineraryPage extends StatelessWidget {
                             ),
                           ),
                         ),
-                        Container(
-                          padding: EdgeInsets.all(AppTheme.defaultMargin - 4),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white,
-                          ),
-                          child: Icon(
-                            Icons.settings,
-                            color: Theme.of(context).hintColor,
+                        GestureDetector(
+                          onTap: () {
+                            _updateDialog("");
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(AppTheme.defaultMargin - 4),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white,
+                            ),
+                            child: Icon(
+                              Icons.edit,
+                              color: Theme.of(context).hintColor,
+                            ),
                           ),
                         ),
                       ],
@@ -219,7 +438,11 @@ class ItineraryPage extends StatelessWidget {
                     ),
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, '/add-agenda');
+                        Navigator.pushNamed(
+                          context,
+                          '/add-agenda',
+                          arguments: '',
+                        );
                       },
                       child: Text(
                         "Add agenda",

@@ -16,3 +16,6 @@ part 'itinerary_page.dart';
 part 'add_itenerary_page.dart';
 part 'add_agenda.dart';
 part 'daily_routine_page.dart';
+part 'agenda_page.dart';
+part 'edit_itinerary.dart';
+part 'edit_agenda.dart';

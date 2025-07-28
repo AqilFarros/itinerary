@@ -1,7 +1,22 @@
 part of 'page.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final authService = AuthService();
+  final dailyRoutine = RoutineService();
+  late Future<Map<String, dynamic>> user;
+
+  @override
+  void initState() {
+    user = authService.getUser();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,9 +69,25 @@ class HomePage extends StatelessWidget {
                   margin: EdgeInsets.symmetric(
                     horizontal: AppTheme.defaultMargin,
                   ),
-                  child: Text(
-                    "👋 Hello Aqil Farros",
-                    style: Theme.of(context).textTheme.titleLarge,
+                  child: FutureBuilder(
+                    future: user,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return CircularProgressIndicator(
+                          color: Theme.of(context).primaryColor,
+                        );
+                      }
+                      if (snapshot.hasError) {
+                        return Text("Error: ${snapshot.error}");
+                      }
+                      if (snapshot.hasData) {
+                        return Text(
+                          "👋 Hello ${snapshot.data!['first_name']} ${snapshot.data!['last_name']}",
+                          style: Theme.of(context).textTheme.titleLarge,
+                        );
+                      }
+                      return SizedBox();
+                    },
                   ),
                 ),
                 Container(
@@ -70,19 +101,45 @@ class HomePage extends StatelessWidget {
                 ),
                 SizedBox(height: AppTheme.defaultMargin * 2),
                 TitleWidget(text: "My Daily Routine"),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.pushNamed(context, '/daily-routine');
+                StreamBuilder(
+                  stream: dailyRoutine.getRoutine(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator(color: Colors.white);
+                    }
+
+                    if (snapshot.hasError) {
+                      return Text("Error: ${snapshot.error}");
+                    }
+
+                    if (snapshot.data!.docs.isEmpty) {
+                      return SizedBox();
+                    }
+
+                    if (snapshot.hasData) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/daily-routine');
+                        },
+                        child: CarouselSlider(
+                          options: CarouselOptions(
+                            autoPlay: true,
+                            height: 110,
+                            enlargeCenterPage: true,
+                            enableInfiniteScroll: false,
+                          ),
+                          items: snapshot.data!.docs.map((item) => CarouselRoutine(
+                            name: item['name'],
+                            type: item['type'],
+                            start: item['start'],
+                            end: item['end'],
+                          )).toList(),
+                        ),
+                      );
+                    }
+
+                    return SizedBox();
                   },
-                  child: CarouselSlider(
-                    options: CarouselOptions(
-                      autoPlay: true,
-                      height: 110,
-                      enlargeCenterPage: true,
-                      enableInfiniteScroll: false,
-                    ),
-                    items: imageSliders,
-                  ),
                 ),
                 SizedBox(height: AppTheme.defaultMargin * 2),
                 TitleWidget(text: "My Upcoming Event"),
@@ -147,16 +204,3 @@ class HomePage extends StatelessWidget {
     );
   }
 }
-
-final List<String> imgList = [
-  'https://images.unsplash.com/photo-1520342868574-5fa3804e551c?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=6ff92caffcdd63681a35134a6770ed3b&auto=format&fit=crop&w=1951&q=80',
-  'https://images.unsplash.com/photo-1522205408450-add114ad53fe?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=368f45b0888aeb0b7b08e3a1084d3ede&auto=format&fit=crop&w=1950&q=80',
-  'https://images.unsplash.com/photo-1519125323398-675f0ddb6308?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=94a1e718d89ca60a6337a6008341ca50&auto=format&fit=crop&w=1950&q=80',
-  'https://images.unsplash.com/photo-1523205771623-e0faa4d2813d?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=89719a0d55dd05e2deae4120227e6efc&auto=format&fit=crop&w=1953&q=80',
-  'https://images.unsplash.com/photo-1508704019882-f9cf40e475b4?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=8c6e5e3aba713b17aa1fe71ab4f0ae5b&auto=format&fit=crop&w=1352&q=80',
-  'https://images.unsplash.com/photo-1519985176271-adb1088fa94c?ixlib=rb-0.3.5&ixid=eyJhcHBfaWQiOjEyMDd9&s=a0c8d632e977f94e5d312d9893258f59&auto=format&fit=crop&w=1355&q=80',
-];
-
-final List<Widget> imageSliders = imgList
-    .map((item) => CarouselRoutine())
-    .toList();

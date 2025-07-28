@@ -8,18 +8,21 @@ class DailyRoutinePage extends StatefulWidget {
 }
 
 class _DailyRoutinePageState extends State<DailyRoutinePage> {
+  final dailyRoutine = RoutineService();
+
   final TextEditingController nameController = TextEditingController();
   final TextEditingController typeController = TextEditingController();
   final TextEditingController startController = TextEditingController();
   final TextEditingController endController = TextEditingController();
   final formKey = GlobalKey<FormState>();
+  bool isLoading = false;
 
   TimeOfDay startTime = TimeOfDay.now();
   TimeOfDay endTime = TimeOfDay.now();
 
   String selectedCategory = '';
   final category = [
-    'homework',
+    'housekeeping',
     'sport',
     'education',
     'cooking',
@@ -32,37 +35,86 @@ class _DailyRoutinePageState extends State<DailyRoutinePage> {
     super.initState();
   }
 
+  void addRoutine() async {
+    if (formKey.currentState!.validate()) {
+      try {
+        setState(() {
+          isLoading = true;
+        });
+
+        await dailyRoutine.addRoutine(
+          name: nameController.text,
+          type: selectedCategory,
+          start: startController.text,
+          end: endController.text,
+        );
+        if (!mounted) return;
+        setState(() {
+          nameController.clear();
+          typeController.clear();
+          startController.clear();
+          endController.clear();
+        });
+        Navigator.pop(context);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              e.toString(),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall!.copyWith(color: Colors.white),
+            ),
+          ),
+        );
+      } finally {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
   void _showDialog() {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          actions: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.white,
-                side: BorderSide(color: Theme.of(context).hintColor, width: 1),
-              ),
-              child: Text(
-                "Cancel",
-                style: Theme.of(context).textTheme.titleSmall!,
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (formKey.currentState!.validate()) {}
-              },
-              child: Text(
-                "Add",
-                style: Theme.of(
-                  context,
-                ).textTheme.titleSmall!.copyWith(color: Colors.white),
-              ),
-            ),
-          ],
+          actions: isLoading
+              ? [
+                  CircularProgressIndicator(
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ]
+              : [
+                  ElevatedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      side: BorderSide(
+                        color: Theme.of(context).hintColor,
+                        width: 1,
+                      ),
+                    ),
+                    child: Text(
+                      "Cancel",
+                      style: Theme.of(context).textTheme.titleSmall!,
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      addRoutine();
+                    },
+                    child: Text(
+                      "Add",
+                      style: Theme.of(
+                        context,
+                      ).textTheme.titleSmall!.copyWith(color: Colors.white),
+                    ),
+                  ),
+                ],
           content: Form(
             key: formKey,
             child: Column(
@@ -116,9 +168,19 @@ class _DailyRoutinePageState extends State<DailyRoutinePage> {
                           if (required != null) return required;
 
                           if (startTime.isAfter(endTime)) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  "End time must be after start time",
+                                  style: Theme.of(context).textTheme.bodySmall!
+                                      .copyWith(color: Colors.white),
+                                ),
+                              ),
+                            );
                             return "End time must be after start time";
                           }
-                          return '';
+
+                          return null;
                         },
                         onTap: () {
                           if (startController.text.isEmpty) {
@@ -157,11 +219,13 @@ class _DailyRoutinePageState extends State<DailyRoutinePage> {
     if (pickedTime != null) {
       setState(() {
         controller.text = pickedTime.format(context);
-        time = pickedTime;
+        if (controller == startController) {
+          startTime = pickedTime;
+        } else {
+          endTime = pickedTime;
+        }
       });
     }
-
-    print(time);
   }
 
   @override
@@ -228,16 +292,47 @@ class _DailyRoutinePageState extends State<DailyRoutinePage> {
                 ).textTheme.displayMedium!.copyWith(color: Colors.white),
               ),
               SizedBox(height: AppTheme.defaultMargin * 2),
-              SwipeToDeleteRoutine(onDismissed: (){},child: CarouselRoutine(),),
-              SizedBox(height: AppTheme.defaultMargin),
-              CarouselRoutine(),
-              SizedBox(height: AppTheme.defaultMargin),
-              CarouselRoutine(),
-              SizedBox(height: AppTheme.defaultMargin),
-              CarouselRoutine(),
-              SizedBox(height: AppTheme.defaultMargin),
-              CarouselRoutine(),
-              SizedBox(height: AppTheme.defaultMargin),
+              StreamBuilder(
+                stream: dailyRoutine.getRoutine(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator(color: Colors.white);
+                  }
+
+                  if (snapshot.hasError) {
+                    return Text("Error: ${snapshot.error}");
+                  }
+
+                  if (snapshot.data!.docs.isEmpty) {
+                    return SizedBox();
+                  }
+
+                  if (snapshot.hasData) {
+                    return Column(
+                      children: snapshot.data!.docs
+                          .map(
+                            (item) => Container(
+                              margin: EdgeInsets.only(
+                                bottom: AppTheme.defaultMargin,
+                              ),
+                              child: SwipeToDeleteRoutine(
+                                onDismissed: () {},
+                                child: CarouselRoutine(
+                                  name: item['name'],
+                                  type: item['type'],
+                                  start: item['start'],
+                                  end: item['end'],
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    );
+                  }
+
+                  return SizedBox();
+                },
+              ),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(

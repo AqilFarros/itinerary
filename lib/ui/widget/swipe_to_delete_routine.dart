@@ -60,18 +60,18 @@ class _SwipeToDeleteRoutineState extends State<SwipeToDeleteRoutine>
       final confirm = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: const Text('Hapus Rutinitas?'),
+          title: const Text('Delete Routine?'),
           content: const Text(
-            'Apakah kamu yakin ingin menghapus rutinitas ini?',
+            'Are you sure want to delete this routine?',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
-              child: const Text('Batal'),
+              child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+              child: const Text('Delete', style: TextStyle(color: Colors.red)),
             ),
           ],
         ),

@@ -1,7 +1,12 @@
 part of 'widget.dart';
 
 class CarouselRoutine extends StatelessWidget {
-  const CarouselRoutine({super.key});
+  const CarouselRoutine({super.key, required this.name, required this.type, required this.start, required this.end});
+
+  final String name;
+  final String type;
+  final int start;
+  final int end;
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +39,7 @@ class CarouselRoutine extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("Work out", style: Theme.of(context).textTheme.bodyLarge),
+              Text(name, style: Theme.of(context).textTheme.bodyLarge),
               Row(
                 children: [
                   Icon(
@@ -44,17 +49,17 @@ class CarouselRoutine extends StatelessWidget {
                   ),
                   SizedBox(width: 5),
                   Text(
-                    "05:00 - 12.00",
-                    style: Theme.of(
-                      context,
-                    ).textTheme.titleSmall!.copyWith(color: Theme.of(context).hintColor),
+                    "${Helper.minuteToHour(start)} - ${Helper.minuteToHour(end)}",
+                    style: Theme.of(context).textTheme.titleSmall!.copyWith(
+                      color: Theme.of(context).hintColor,
+                    ),
                   ),
                 ],
               ),
             ],
           ),
           Image.asset(
-            'asset/icon/sport.png',
+            'asset/icon/$type.png',
             width: 70,
             height: 70,
             fit: BoxFit.cover,

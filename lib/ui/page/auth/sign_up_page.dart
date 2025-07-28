@@ -1,4 +1,4 @@
-part of 'page.dart';
+part of '../page.dart';
 
 class SignUpPage extends StatefulWidget {
   const SignUpPage({super.key});
@@ -15,6 +15,43 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController confirmPasswordController =
       TextEditingController();
   final formKey = GlobalKey<FormState>();
+  bool isLoading = false;
+  final authService = AuthService();
+
+  void signUp() async {
+    if (formKey.currentState!.validate()) {
+      setState(() {
+        isLoading = true;
+      });
+
+      try {
+        await authService.signUp(
+          firstName: firstNameController.text,
+          lastName: lastNameController.text,
+          email: emailController.text,
+          password: passwordController.text,
+        );
+
+        if (!mounted) return;
+        Navigator.pushReplacementNamed(context, '/home');
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              e.toString(),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall!.copyWith(color: Colors.white),
+            ),
+          ),
+        );
+      } finally {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,30 +133,40 @@ class _SignUpPageState extends State<SignUpPage> {
                   SizedBox(height: AppTheme.defaultMargin),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Navigator.pushReplacementNamed(context, '/sign-in');
-                        },
-                        child: Text(
-                          "Already have an account?",
-                          style: Theme.of(context).textTheme.titleSmall!
-                              .copyWith(color: Theme.of(context).primaryColor),
-                        ),
-                      ),
-                      SizedBox(width: AppTheme.defaultMargin),
-                      ElevatedButton(
-                        onPressed: () {
-                          if (formKey.currentState!.validate()) {}
-                        },
-                        child: Text(
-                          "Sign up",
-                          style: Theme.of(
-                            context,
-                          ).textTheme.titleSmall!.copyWith(color: Colors.white),
-                        ),
-                      ),
-                    ],
+                    children: isLoading
+                        ? [
+                            CircularProgressIndicator(
+                              color: Theme.of(context).primaryColor,
+                            ),
+                          ]
+                        : [
+                            GestureDetector(
+                              onTap: () {
+                                Navigator.pushReplacementNamed(
+                                  context,
+                                  '/sign-in',
+                                );
+                              },
+                              child: Text(
+                                "Already have an account?",
+                                style: Theme.of(context).textTheme.titleSmall!
+                                    .copyWith(
+                                      color: Theme.of(context).primaryColor,
+                                    ),
+                              ),
+                            ),
+                            SizedBox(width: AppTheme.defaultMargin),
+                            ElevatedButton(
+                              onPressed: () {
+                                signUp();
+                              },
+                              child: Text(
+                                "Sign up",
+                                style: Theme.of(context).textTheme.titleSmall!
+                                    .copyWith(color: Colors.white),
+                              ),
+                            ),
+                          ],
                   ),
                 ],
               ),

@@ -61,7 +61,7 @@ class _WelcomePageState extends State<WelcomePage> {
               ),
               SizedBox(height: AppTheme.defaultMargin * 2),
               Text(
-                "ITENERARY",
+                "ITINERARY",
                 style: Theme.of(context).textTheme.titleLarge!.copyWith(
                   color: Theme.of(context).primaryColor,
                   letterSpacing: 2,

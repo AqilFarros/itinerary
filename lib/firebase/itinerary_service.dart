@@ -23,6 +23,17 @@ class ItineraryService {
         .snapshots();
   }
 
+  Stream<QuerySnapshot> getAgenda(String id) {
+    return firestore
+        .collection('users')
+        .doc(userId)
+        .collection('itineraries')
+        .doc(id)
+        .collection('agendas')
+        .orderBy('date')
+        .snapshots();
+  }
+
   Future<void> addItenerary({
     required String place,
     // required File image,
@@ -34,7 +45,7 @@ class ItineraryService {
     await firestore
         .collection('users')
         .doc(userId)
-        .collection('iteneraries')
+        .collection('itineraries')
         .add(({
           "place": place,
           // "image": image,
@@ -70,11 +81,20 @@ class ItineraryService {
   }
 
   Future<void> deleteItinerary(String id) async {
-    await firestore
+    final itineraryRef = firestore
         .collection("users")
         .doc(userId)
         .collection("itineraries")
-        .doc(id)
-        .delete();
+        .doc(id);
+
+    final agendasSnapshot = await itineraryRef.collection("agendas").get();
+
+    final deleteAgendas = agendasSnapshot.docs.map(
+      (doc) => doc.reference.delete(),
+    );
+
+    await Future.wait(deleteAgendas);
+
+    await itineraryRef.delete();
   }
 }

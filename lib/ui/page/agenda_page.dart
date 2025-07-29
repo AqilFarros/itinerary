@@ -34,7 +34,7 @@ class _AgendaPageState extends State<AgendaPage> {
             children: [
               SizedBox(height: AppTheme.defaultMargin * 3),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   GestureDetector(
                     onTap: () {
@@ -50,17 +50,6 @@ class _AgendaPageState extends State<AgendaPage> {
                         Icons.arrow_back_ios_new_outlined,
                         color: Theme.of(context).hintColor,
                       ),
-                    ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.all(AppTheme.defaultMargin - 4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                    ),
-                    child: Icon(
-                      Icons.settings,
-                      color: Theme.of(context).hintColor,
                     ),
                   ),
                 ],
@@ -93,7 +82,13 @@ class _AgendaPageState extends State<AgendaPage> {
                     return Column(
                       children: snapshot.data!.docs
                           .map(
-                            (item) => EventCard()
+                            (item) => EventCard(
+                              name: item['name'],
+                              date: item['date'],
+                              description: item['description'],
+                              type: item['type'],
+                              location: item['place'],
+                            )
                           )
                           .toList(),
                     );

@@ -1,7 +1,9 @@
 import 'dart:ui';
 
 import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import 'package:itinerary/firebase/firebase.dart';
 import 'package:itinerary/helper/helper.dart';
 import 'package:itinerary/theme/theme.dart';
@@ -19,3 +21,4 @@ part 'daily_routine_page.dart';
 part 'agenda_page.dart';
 part 'edit_itinerary.dart';
 part 'edit_agenda.dart';
+part 'auth/profile_page.dart';

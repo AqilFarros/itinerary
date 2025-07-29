@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 
 class Helper {
@@ -37,5 +38,12 @@ class Helper {
     String formatted = DateFormat.jm().format(dateTime);
 
     return formatted;
+  }
+
+  static int dayDifferenceFromTimestamp(Timestamp from, Timestamp to) {
+    DateTime fromDate = from.toDate();
+    DateTime toDate = to.toDate();
+
+    return toDate.difference(fromDate).inDays;
   }
 }

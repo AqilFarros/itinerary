@@ -53,15 +53,20 @@ class _HomePageState extends State<HomePage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Container(
-                        padding: EdgeInsets.all(AppTheme.defaultMargin - 4),
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                        ),
-                        child: Icon(
-                          Icons.settings,
-                          color: Theme.of(context).hintColor,
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushNamed(context, '/profile');
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(AppTheme.defaultMargin - 4),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white,
+                          ),
+                          child: Icon(
+                            Icons.settings,
+                            color: Theme.of(context).hintColor,
+                          ),
                         ),
                       ),
                     ],
@@ -115,7 +120,22 @@ class _HomePageState extends State<HomePage> {
                     }
 
                     if (snapshot.data!.docs.isEmpty) {
-                      return SizedBox();
+                      return Container(
+                        width: double.infinity,
+                        margin: EdgeInsets.symmetric(
+                          horizontal: AppTheme.defaultMargin,
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/daily-routine');
+                          },
+                          child: Text(
+                            "Add routinity",
+                            style: Theme.of(context).textTheme.titleSmall!
+                                .copyWith(color: Colors.white),
+                          ),
+                        ),
+                      );
                     }
 
                     if (snapshot.hasData) {
@@ -148,8 +168,6 @@ class _HomePageState extends State<HomePage> {
                   },
                 ),
                 SizedBox(height: AppTheme.defaultMargin * 2),
-                TitleWidget(text: "My Upcoming Event"),
-                SizedBox(height: AppTheme.defaultMargin),
                 StreamBuilder(
                   stream: agenda.getAgenda(),
                   builder: (context, snapshot) {
@@ -167,33 +185,50 @@ class _HomePageState extends State<HomePage> {
 
                     if (snapshot.hasData) {
                       return Column(
-                        children: snapshot.data!.docs
-                            .map(
-                              (item) => EventCard(),
-                            )
-                            .toList(),
+                        children:
+                            [
+                              TitleWidget(text: "My Upcoming Event"),
+                              SizedBox(height: AppTheme.defaultMargin),
+                            ] +
+                            snapshot.data!.docs
+                                .take(2)
+                                .map(
+                                  (item) => EventCard(
+                                    name: item['name'],
+                                    date: item['date'],
+                                    description: item['description'],
+                                    type: item['type'],
+                                    location: item['place'],
+                                  ),
+                                )
+                                .toList() +
+                            [
+                              Container(
+                                margin: EdgeInsets.symmetric(
+                                  horizontal: AppTheme.defaultMargin,
+                                ),
+                                alignment: Alignment.centerRight,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pushNamed(context, '/agenda');
+                                  },
+                                  child: Text(
+                                    "See more",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall!
+                                        .copyWith(color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: AppTheme.defaultMargin),
+                            ],
                       );
                     }
 
                     return SizedBox();
-                  }
+                  },
                 ),
-                Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: AppTheme.defaultMargin,
-                  ),
-                  alignment: Alignment.centerRight,
-                  child: ElevatedButton(
-                    onPressed: () {},
-                    child: Text(
-                      "See more",
-                      style: Theme.of(
-                        context,
-                      ).textTheme.titleSmall!.copyWith(color: Colors.white),
-                    ),
-                  ),
-                ),
-                SizedBox(height: AppTheme.defaultMargin),
                 TitleWidget(text: "My Dream Itinerary"),
                 SizedBox(height: AppTheme.defaultMargin),
                 StreamBuilder(
@@ -208,52 +243,90 @@ class _HomePageState extends State<HomePage> {
                     }
 
                     if (snapshot.data!.docs.isEmpty) {
-                      return SizedBox();
+                      return Container(
+                        margin: EdgeInsets.symmetric(
+                          horizontal: AppTheme.defaultMargin,
+                        ),
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/add-itinerary');
+                          },
+                          child: Text(
+                            "Add itinerary",
+                            style: Theme.of(context).textTheme.titleSmall!
+                                .copyWith(color: Colors.white),
+                          ),
+                        ),
+                      );
                     }
 
                     if (snapshot.hasData) {
-                      return SizedBox(
-                        height: 300,
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          scrollDirection: Axis.horizontal,
-                          itemCount: snapshot.data!.docs.length,
-                          itemBuilder: (context, index) {
-                            if (index == 0) {
-                              return Container(
-                                margin: EdgeInsets.only(
-                                  left: AppTheme.defaultMargin,
-                                ),
-                                child: ItineraryCard(),
-                              );
-                            } else {
-                              return ItineraryCard();
-                            }
-                          },
-                        ),
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            height: 300,
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              scrollDirection: Axis.horizontal,
+                              itemCount: snapshot.data!.docs.length,
+                              itemBuilder: (context, index) {
+                                if (index == 0) {
+                                  return Container(
+                                    margin: EdgeInsets.only(
+                                      left: AppTheme.defaultMargin,
+                                    ),
+                                    child: ItineraryCard(
+                                      id: snapshot.data!.docs[index].id,
+                                      place:
+                                          snapshot.data!.docs[index]['place'],
+                                      from: snapshot.data!.docs[index]['from'],
+                                      to: snapshot.data!.docs[index]['to'],
+                                      type: snapshot.data!.docs[index]['type'],
+                                      description: snapshot
+                                          .data!
+                                          .docs[index]['description'],
+                                    ),
+                                  );
+                                } else {
+                                  return ItineraryCard(
+                                    id: snapshot.data!.docs[index].id,
+                                    place: snapshot.data!.docs[index]['place'],
+                                    from: snapshot.data!.docs[index]['from'],
+                                    to: snapshot.data!.docs[index]['to'],
+                                    type: snapshot.data!.docs[index]['type'],
+                                    description: snapshot
+                                        .data!
+                                        .docs[index]['description'],
+                                  );
+                                }
+                              },
+                            ),
+                          ),
+                          SizedBox(height: AppTheme.defaultMargin / 2),
+                          Container(
+                            margin: EdgeInsets.symmetric(
+                              horizontal: AppTheme.defaultMargin,
+                            ),
+                            alignment: Alignment.centerRight,
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.pushNamed(context, '/add-itinerary');
+                              },
+                              child: Text(
+                                "Add itenerary",
+                                style: Theme.of(context).textTheme.titleSmall!
+                                    .copyWith(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ],
                       );
                     }
 
                     return SizedBox();
                   },
-                ),
-                SizedBox(height: AppTheme.defaultMargin / 2),
-                Container(
-                  margin: EdgeInsets.symmetric(
-                    horizontal: AppTheme.defaultMargin,
-                  ),
-                  alignment: Alignment.centerRight,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/add-itinerary');
-                    },
-                    child: Text(
-                      "Add itenerary",
-                      style: Theme.of(
-                        context,
-                      ).textTheme.titleSmall!.copyWith(color: Colors.white),
-                    ),
-                  ),
                 ),
                 SizedBox(height: AppTheme.defaultMargin * 4),
               ],

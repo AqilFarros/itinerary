@@ -1,9 +1,11 @@
 part of 'page.dart';
 
 class AddAgenda extends StatefulWidget {
-  const AddAgenda({super.key, required this.itineraryId});
+  const AddAgenda({super.key, required this.itineraryId, required this.startDate, required this.endDate});
 
   final String itineraryId;
+  final Timestamp startDate;
+  final Timestamp endDate;
 
   @override
   State<AddAgenda> createState() => _AddAgendaState();
@@ -59,8 +61,8 @@ class _AddAgendaState extends State<AddAgenda> {
   void _selectDate(TextEditingController controller) async {
     DateTime? picked = await showDatePicker(
       context: context,
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2100),
+      firstDate: widget.startDate.toDate(),
+      lastDate: widget.endDate.toDate(),
     );
 
     if (picked != null) {
@@ -97,7 +99,7 @@ class _AddAgendaState extends State<AddAgenda> {
                   InputField(
                     controller: nameController,
                     hint: "Your agenda's name",
-                    label: "Place",
+                    label: "Name",
                     validator: InputValidator.requiredField,
                   ),
                   SizedBox(height: AppTheme.defaultMargin),
@@ -136,7 +138,11 @@ class _AddAgendaState extends State<AddAgenda> {
                   SizedBox(height: AppTheme.defaultMargin),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
+                    children: isLoading ? [
+                      CircularProgressIndicator(
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ] : [
                       ElevatedButton(
                         onPressed: () {
                           Navigator.pop(context);

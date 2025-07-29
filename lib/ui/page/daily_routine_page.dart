@@ -252,7 +252,7 @@ class _DailyRoutinePageState extends State<DailyRoutinePage> {
             children: [
               SizedBox(height: AppTheme.defaultMargin * 3),
               Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: [
                   GestureDetector(
                     onTap: () {
@@ -268,17 +268,6 @@ class _DailyRoutinePageState extends State<DailyRoutinePage> {
                         Icons.arrow_back_ios_new_outlined,
                         color: Theme.of(context).hintColor,
                       ),
-                    ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.all(AppTheme.defaultMargin - 4),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                    ),
-                    child: Icon(
-                      Icons.settings,
-                      color: Theme.of(context).hintColor,
                     ),
                   ),
                 ],

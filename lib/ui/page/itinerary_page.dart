@@ -1,7 +1,22 @@
 part of 'page.dart';
 
 class ItineraryPage extends StatefulWidget {
-  const ItineraryPage({super.key});
+  const ItineraryPage({
+    super.key,
+    required this.id,
+    required this.place,
+    required this.type,
+    required this.from,
+    required this.to,
+    required this.description,
+  });
+
+  final String id;
+  final String place;
+  final String type;
+  final Timestamp from;
+  final Timestamp to;
+  final String description;
 
   @override
   State<ItineraryPage> createState() => _ItineraryPageState();
@@ -9,33 +24,13 @@ class ItineraryPage extends StatefulWidget {
 
 class _ItineraryPageState extends State<ItineraryPage> {
   final itinerary = ItineraryService();
-  final nameController = TextEditingController();
-  final descriptionController = TextEditingController();
-  final fromController = TextEditingController();
-  final toController = TextEditingController();
-  final typeController = TextEditingController();
-  final formKey = GlobalKey<FormState>();
+  String? type;
+  String? place;
+  Timestamp? from;
+  Timestamp? to;
+  String? description;
 
-  void _selectDate(
-    TextEditingController controller, {
-    DateTime? firstDate,
-  }) async {
-    DateTime? picked = await showDatePicker(
-      context: context,
-      firstDate: firstDate ?? DateTime.now(),
-      lastDate: DateTime(2100),
-    );
-
-    if (picked != null) {
-      setState(() {
-        controller.text = Helper.formatDate(picked);
-      });
-    }
-  }
-
-  void _updateAgenda() {}
-
-  void _agendaDialog() {
+  void _deleteDialog(String id) {
     showDialog(
       context: context,
       builder: (context) {
@@ -55,162 +50,85 @@ class _ItineraryPageState extends State<ItineraryPage> {
               ),
             ),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () async {
+                await itinerary.deleteItinerary(id);
+                Navigator.pop(context);
+                Navigator.pop(context);
+                Navigator.pop(context);
+              },
               child: Text(
-                "Update",
+                "Delete",
                 style: Theme.of(
                   context,
                 ).textTheme.titleSmall!.copyWith(color: Colors.white),
               ),
             ),
           ],
-          content: SingleChildScrollView(
-            child: Form(
-              key: formKey,
-              child: Column(
-                children: [
-                  
-                ],
-              ),
-            ),
+          title: Text(
+            "Are you sure want to delete this itinerary?",
+            style: Theme.of(context).textTheme.titleLarge,
           ),
         );
       },
     );
   }
 
-  void _updateItinerary(String id) async {
-    if (formKey.currentState!.validate()) {
-      try {
-        await itinerary.updateItinerary(
-          id: id,
-          place: nameController.text,
-          description: descriptionController.text,
-          from: fromController.text,
-          to: toController.text,
-          type: typeController.text,
-        );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              e.toString(),
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall!.copyWith(color: Colors.white),
-            ),
-          ),
-        );
-      }
-    }
-  }
-
-  void _updateDialog(String id) {
+  void _editDialog(String id) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
           actions: [
             ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context);
+              onPressed: () async {
+                final updatedDate =
+                    await Navigator.pushNamed<Map<String, dynamic>>(
+                      context,
+                      '/edit-itinerary',
+                      arguments: {
+                        'id': id,
+                        'place': place ?? widget.place,
+                        'type': type ?? widget.type,
+                        'from': from ?? widget.from,
+                        'to': to ?? widget.to,
+                        'description': description ?? widget.description,
+                      },
+                    );
+
+                if (updatedDate != null) {
+                  setState(() {
+                    place = updatedDate['place'];
+                    type = updatedDate['type'];
+                    from = updatedDate['from'];
+                    to = updatedDate['to'];
+                    description = updatedDate['description'];
+                  });
+                }
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 side: BorderSide(color: Theme.of(context).hintColor, width: 1),
               ),
               child: Text(
-                "Cancel",
+                "Edit",
                 style: Theme.of(context).textTheme.titleSmall!,
               ),
             ),
             ElevatedButton(
               onPressed: () {
-                _updateItinerary(id);
+                _deleteDialog(id);
               },
               child: Text(
-                "Update",
+                "Delete",
                 style: Theme.of(
                   context,
                 ).textTheme.titleSmall!.copyWith(color: Colors.white),
               ),
             ),
           ],
-          content: SingleChildScrollView(
-            child: Form(
-              child: Column(
-                children: [
-                  InputField(
-                    controller: nameController,
-                    hint: "ex: Jakarta, Bandung, Bali",
-                    label: "Place",
-                    validator: InputValidator.requiredField,
-                  ),
-                  SizedBox(height: AppTheme.defaultMargin),
-                  InputField(
-                    controller: typeController,
-                    label: "Type",
-                    hint: "ex: family, friends, work",
-                    validator: InputValidator.requiredField,
-                  ),
-                  SizedBox(height: AppTheme.defaultMargin),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: InputField(
-                          controller: fromController,
-                          label: "From",
-                          hint: "15 December 2022",
-                          textInputType: TextInputType.name,
-                          validator: InputValidator.requiredField,
-                          onTap: () {
-                            _selectDate(fromController);
-                          },
-                        ),
-                      ),
-                      SizedBox(width: AppTheme.defaultMargin),
-                      Expanded(
-                        child: InputField(
-                          controller: toController,
-                          label: "To",
-                          hint: "16 December 2022",
-                          validator: InputValidator.requiredField,
-                          onTap: () {
-                            if (fromController.text.isEmpty) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    "Please select from date first",
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall!
-                                        .copyWith(color: Colors.white),
-                                  ),
-                                ),
-                              );
-                            } else {
-                              _selectDate(
-                                toController,
-                                firstDate: Helper.formatDateToISO8601(
-                                  fromController.text,
-                                ),
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: AppTheme.defaultMargin),
-                  InputField(
-                    controller: descriptionController,
-                    label: "Description",
-                    hint: "",
-                    maxLine: 5,
-                  ),
-                ],
-              ),
-            ),
+          title: Text(
+            "Edit or delete itinerary",
+            style: Theme.of(context).textTheme.titleLarge,
           ),
         );
       },
@@ -274,7 +192,7 @@ class _ItineraryPageState extends State<ItineraryPage> {
                         ),
                         GestureDetector(
                           onTap: () {
-                            _updateDialog("");
+                            _editDialog(widget.id);
                           },
                           child: Container(
                             padding: EdgeInsets.all(AppTheme.defaultMargin - 4),
@@ -297,7 +215,7 @@ class _ItineraryPageState extends State<ItineraryPage> {
                       horizontal: AppTheme.defaultMargin,
                     ),
                     child: Text(
-                      "BATAM",
+                      place ?? widget.place,
                       textAlign: TextAlign.center,
                       style: Theme.of(
                         context,
@@ -309,7 +227,7 @@ class _ItineraryPageState extends State<ItineraryPage> {
                       horizontal: AppTheme.defaultMargin,
                     ),
                     child: Text(
-                      "12 December 2025",
+                      Helper.formatDate((from ?? widget.from).toDate()),
                       textAlign: TextAlign.center,
                       style: Theme.of(
                         context,
@@ -332,7 +250,7 @@ class _ItineraryPageState extends State<ItineraryPage> {
                           color: Theme.of(context).hintColor.withOpacity(0.5),
                         ),
                         child: Text(
-                          "Family",
+                          type ?? widget.type,
                           style: Theme.of(
                             context,
                           ).textTheme.titleLarge!.copyWith(color: Colors.white),
@@ -351,7 +269,7 @@ class _ItineraryPageState extends State<ItineraryPage> {
                           color: Theme.of(context).hintColor.withOpacity(0.5),
                         ),
                         child: Text(
-                          "10 Days trip",
+                          "${Helper.dayDifferenceFromTimestamp(from ?? widget.from, to ?? widget.to)} Days trip",
                           style: Theme.of(
                             context,
                           ).textTheme.titleLarge!.copyWith(color: Colors.white),
@@ -360,25 +278,28 @@ class _ItineraryPageState extends State<ItineraryPage> {
                     ],
                   ),
                   SizedBox(height: AppTheme.defaultMargin * 2),
-                  Container(
-                    width: 250,
-                    height: 300,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(
-                        AppTheme.defaultMargin * 2,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.15),
-                          blurRadius: 8,
-                          offset: const Offset(0, 0),
+                  Hero(
+                    tag: widget.id,
+                    child: Container(
+                      width: 250,
+                      height: 300,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(
+                          AppTheme.defaultMargin * 2,
                         ),
-                      ],
-                      image: DecorationImage(
-                        image: NetworkImage(
-                          'https://i.pinimg.com/736x/35/aa/53/35aa537a8a5a55658c617821fc287357.jpg',
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.15),
+                            blurRadius: 8,
+                            offset: const Offset(0, 0),
+                          ),
+                        ],
+                        image: DecorationImage(
+                          image: NetworkImage(
+                            'https://i.pinimg.com/736x/35/aa/53/35aa537a8a5a55658c617821fc287357.jpg',
+                          ),
+                          fit: BoxFit.cover,
                         ),
-                        fit: BoxFit.cover,
                       ),
                     ),
                   ),
@@ -388,49 +309,186 @@ class _ItineraryPageState extends State<ItineraryPage> {
                       horizontal: AppTheme.defaultMargin,
                     ),
                     child: Text(
-                      "Itinerary to Batam",
+                      "Itinerary to ${place ?? widget.place}",
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ),
                   SizedBox(height: AppTheme.defaultMargin),
-                  Text(
-                    "Upcoming",
-                    style: Theme.of(context).textTheme.titleMedium,
+                  StreamBuilder(
+                    stream: itinerary.getAgenda(widget.id),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return CircularProgressIndicator(
+                          color: Theme.of(context).primaryColor,
+                        );
+                      }
+
+                      if (snapshot.hasError) {
+                        return Text("Error: ${snapshot.error}");
+                      }
+
+                      if (snapshot.hasData) {
+                        List upcoming = snapshot.data!.docs.where((element) {
+                          final date = element['date'].toDate();
+                          final now = DateTime.now();
+
+                          final dateOnly = DateTime(
+                            date.year,
+                            date.month,
+                            date.day,
+                          );
+                          final todayOnly = DateTime(
+                            now.year,
+                            now.month,
+                            now.day,
+                          );
+
+                          return dateOnly.isAtSameMomentAs(todayOnly) ||
+                              dateOnly.isAfter(todayOnly);
+                        }).toList();
+
+                        List expired = snapshot.data!.docs.where((element) {
+                          final date = element['date'].toDate();
+                          final now = DateTime.now();
+
+                          final dateOnly = DateTime(
+                            date.year,
+                            date.month,
+                            date.day,
+                          );
+                          final todayOnly = DateTime(
+                            now.year,
+                            now.month,
+                            now.day,
+                          );
+
+                          return dateOnly.isBefore(todayOnly);
+                        }).toList();
+                        return Column(
+                          children: [
+                            upcoming.isNotEmpty
+                                ? Column(
+                                    children: [
+                                      Text(
+                                        "Upcoming",
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.titleMedium,
+                                      ),
+                                      SizedBox(height: AppTheme.defaultMargin),
+                                      SizedBox(
+                                        height: 250,
+                                        child: ListView.builder(
+                                          shrinkWrap: true,
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: upcoming.length,
+                                          itemBuilder: (context, index) {
+                                            if (index == 0) {
+                                              return Container(
+                                                margin: EdgeInsets.only(
+                                                  left: AppTheme.defaultMargin,
+                                                ),
+                                                child: ActivityCard(
+                                                  id: upcoming[index].id,
+                                                  itineraryId: widget.id,
+                                                  name: upcoming[index]['name'],
+                                                  type: upcoming[index]['type'],
+                                                  location:
+                                                      upcoming[index]['place'],
+                                                  date: upcoming[index]['date'],
+                                                  description:
+                                                      upcoming[index]['description'],
+                                                  fromDate: from ?? widget.from,
+                                                  toDate: to ?? widget.to,
+                                                ),
+                                              );
+                                            } else {
+                                              return ActivityCard(
+                                                id: upcoming[index].id,
+                                                itineraryId: widget.id,
+                                                name: upcoming[index]['name'],
+                                                type: upcoming[index]['type'],
+                                                location:
+                                                    upcoming[index]['place'],
+                                                date: upcoming[index]['date'],
+                                                description:
+                                                    upcoming[index]['description'],
+                                                fromDate: from ?? widget.from,
+                                                toDate: to ?? widget.to,
+                                              );
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                      SizedBox(height: AppTheme.defaultMargin),
+                                    ],
+                                  )
+                                : SizedBox(),
+                            expired.isNotEmpty
+                                ? Column(
+                                    children: [
+                                      Text(
+                                        "Expired",
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.titleMedium,
+                                      ),
+                                      SizedBox(height: AppTheme.defaultMargin),
+                                      SizedBox(
+                                        height: 250,
+                                        child: ListView.builder(
+                                          shrinkWrap: true,
+                                          scrollDirection: Axis.horizontal,
+                                          itemCount: expired.length,
+                                          itemBuilder: (context, index) {
+                                            if (index == 0) {
+                                              return Container(
+                                                margin: EdgeInsets.only(
+                                                  left: AppTheme.defaultMargin,
+                                                ),
+                                                child: ActivityCard(
+                                                  id: upcoming[index].id,
+                                                  itineraryId: widget.id,
+                                                  name: expired[index]['name'],
+                                                  type: expired[index]['type'],
+                                                  location:
+                                                      expired[index]['place'],
+                                                  date: expired[index]['date'],
+                                                  description:
+                                                      expired[index]['description'],
+                                                  fromDate: from ?? widget.from,
+                                                  toDate: to ?? widget.to,
+                                                ),
+                                              );
+                                            } else {
+                                              return ActivityCard(
+                                                id: upcoming[index].id,
+                                                itineraryId: widget.id,
+                                                name: expired[index]['name'],
+                                                type: expired[index]['type'],
+                                                location:
+                                                    expired[index]['place'],
+                                                date: expired[index]['date'],
+                                                description:
+                                                    expired[index]['description'],
+                                                fromDate: from ?? widget.from,
+                                                toDate: to ?? widget.to,
+                                              );
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                      SizedBox(height: AppTheme.defaultMargin),
+                                    ],
+                                  )
+                                : SizedBox(),
+                          ],
+                        );
+                      }
+
+                      return SizedBox();
+                    },
                   ),
-                  SizedBox(height: AppTheme.defaultMargin),
-                  SizedBox(
-                    height: 250,
-                    child: ListView(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        SizedBox(width: AppTheme.defaultMargin),
-                        ActivityCard(),
-                        ActivityCard(),
-                        ActivityCard(),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: AppTheme.defaultMargin),
-                  Text(
-                    "Expired",
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                  SizedBox(height: AppTheme.defaultMargin),
-                  SizedBox(
-                    height: 250,
-                    child: ListView(
-                      shrinkWrap: true,
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        SizedBox(width: AppTheme.defaultMargin),
-                        ActivityCard(),
-                        ActivityCard(),
-                        ActivityCard(),
-                      ],
-                    ),
-                  ),
-                  SizedBox(height: AppTheme.defaultMargin),
                   Container(
                     width: double.infinity,
                     margin: EdgeInsets.symmetric(
@@ -441,7 +499,11 @@ class _ItineraryPageState extends State<ItineraryPage> {
                         Navigator.pushNamed(
                           context,
                           '/add-agenda',
-                          arguments: '',
+                          arguments: {
+                            'id': widget.id,
+                            'startDate': from ?? widget.from,
+                            'endDate': to ?? widget.to,
+                          },
                         );
                       },
                       child: Text(

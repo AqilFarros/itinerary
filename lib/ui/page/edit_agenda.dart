@@ -9,15 +9,20 @@ class EditAgenda extends StatefulWidget {
     required this.type,
     required this.location,
     required this.date,
-    required this.description,});
+    required this.description,
+    required this.fromDate,
+    required this.toDate,
+  });
 
   final String itineraryId;
   final String agendaId;
   final String name;
   final String type;
   final String location;
-  final String date;
+  final Timestamp date;
   final String description;
+  final Timestamp fromDate;
+  final Timestamp toDate;
 
   @override
   State<EditAgenda> createState() => _EditAgendaState();
@@ -38,7 +43,7 @@ class _EditAgendaState extends State<EditAgenda> {
     nameController.text = widget.name;
     typeController.text = widget.type;
     locationController.text = widget.location;
-    dateController.text = widget.date;
+    dateController.text = Helper.formatDate(widget.date.toDate());
     descriptionController.text = widget.description;
     super.initState();
   }
@@ -62,6 +67,7 @@ class _EditAgendaState extends State<EditAgenda> {
 
         if (!mounted) return;
         Navigator.pop(context);
+        Navigator.pop(context);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -84,8 +90,8 @@ class _EditAgendaState extends State<EditAgenda> {
   void _selectDate(TextEditingController controller) async {
     DateTime? picked = await showDatePicker(
       context: context,
-      firstDate: DateTime.now(),
-      lastDate: DateTime(2100),
+      firstDate: widget.fromDate.toDate(),
+      lastDate: widget.toDate.toDate(),
     );
 
     if (picked != null) {
@@ -161,7 +167,11 @@ class _EditAgendaState extends State<EditAgenda> {
                   SizedBox(height: AppTheme.defaultMargin),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
+                    children: isLoading ? [
+                      CircularProgressIndicator(
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ] : [
                       ElevatedButton(
                         onPressed: () {
                           Navigator.pop(context);
@@ -184,7 +194,7 @@ class _EditAgendaState extends State<EditAgenda> {
                           editAgenda();
                         },
                         child: Text(
-                          "Updata",
+                          "Update",
                           style: Theme.of(
                             context,
                           ).textTheme.titleSmall!.copyWith(color: Colors.white),

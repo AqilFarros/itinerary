@@ -1,7 +1,13 @@
 part of 'widget.dart';
 
 class EventCard extends StatelessWidget {
-  const EventCard({super.key});
+  const EventCard({super.key, required this.name, required this.type, required this.location, required this.date, required this.description,});
+
+  final String name;
+  final String type;
+  final String location;
+  final Timestamp date;
+  final String description;
 
   @override
   Widget build(BuildContext context) {
@@ -33,7 +39,7 @@ class EventCard extends StatelessWidget {
                     color: Theme.of(context).primaryColor.withOpacity(0.2),
                   ),
                   child: Text(
-                    "Flight",
+                    type,
                     style: Theme.of(context).textTheme.bodyMedium!.copyWith(
                       color: Theme.of(context).primaryColor,
                     ),
@@ -43,11 +49,13 @@ class EventCard extends StatelessWidget {
             ),
             SizedBox(height: AppTheme.defaultMargin / 2),
             Text(
-              "Traveling to Japan",
+              name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             Text(
-              "Starting my journey to Batam island with my collegue friend.",
+              description,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall,
@@ -67,7 +75,7 @@ class EventCard extends StatelessWidget {
                     ),
                     SizedBox(width: 5),
                     Text(
-                      "Airport",
+                      location,
                       style: Theme.of(context).textTheme.titleSmall!.copyWith(
                         color: Theme.of(context).hintColor,
                       ),
@@ -84,7 +92,7 @@ class EventCard extends StatelessWidget {
                     ),
                     SizedBox(width: 5),
                     Text(
-                      "25 December 2025",
+                      Helper.formatDate(date.toDate()),
                       style: Theme.of(context).textTheme.titleSmall!.copyWith(
                         color: Theme.of(context).hintColor,
                       ),

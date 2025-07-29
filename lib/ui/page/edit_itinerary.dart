@@ -1,13 +1,13 @@
 part of 'page.dart';
 
 class EditIteneraryPage extends StatefulWidget {
-  const EditIteneraryPage({super.key, required this.id,required this.name,required this.type,required this.from,required this.to,required this.description,});
+  const EditIteneraryPage({super.key, required this.id,required this.place,required this.type,required this.from,required this.to,required this.description,});
 
   final String id;
-  final String name;
+  final String place;
   final String type;
-  final String from;
-  final String to;
+  final Timestamp from;
+  final Timestamp to;
   final String description;
 
   @override
@@ -15,7 +15,7 @@ class EditIteneraryPage extends StatefulWidget {
 }
 
 class _EditIteneraryPageState extends State<EditIteneraryPage> {
-  final TextEditingController nameController = TextEditingController();
+  final TextEditingController placeController = TextEditingController();
   final TextEditingController typeController = TextEditingController();
   final TextEditingController fromController = TextEditingController();
   final TextEditingController toController = TextEditingController();
@@ -26,10 +26,10 @@ class _EditIteneraryPageState extends State<EditIteneraryPage> {
 
   @override
   void initState() {
-    nameController.text = widget.name;
+    placeController.text = widget.place;
     typeController.text = widget.type;
-    fromController.text = widget.from;
-    toController.text = widget.to;
+    fromController.text = Helper.formatDate(widget.from.toDate());
+    toController.text = Helper.formatDate(widget.to.toDate());
     descriptionController.text = widget.description; 
     super.initState();
   }
@@ -43,7 +43,7 @@ class _EditIteneraryPageState extends State<EditIteneraryPage> {
 
         await itinerary.updateItinerary(
           id: widget.id,
-          place: nameController.text,
+          place: placeController.text,
           description: descriptionController.text,
           from: fromController.text,
           to: toController.text,
@@ -51,6 +51,13 @@ class _EditIteneraryPageState extends State<EditIteneraryPage> {
         );
 
         if (!mounted) return;
+        Navigator.of(context).pop({
+          'place': placeController.text,
+          'type': typeController.text,
+          'from': Timestamp.fromDate(Helper.formatDateToISO8601(fromController.text)),
+          'to': Timestamp.fromDate(Helper.formatDateToISO8601(toController.text)),
+          'description': descriptionController.text,
+        });
         Navigator.pop(context);
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -113,7 +120,7 @@ class _EditIteneraryPageState extends State<EditIteneraryPage> {
                   ),
                   SizedBox(height: AppTheme.defaultMargin * 2),
                   InputField(
-                    controller: nameController,
+                    controller: placeController,
                     hint: "ex: Jakarta, Bandung, Bali",
                     label: "Place",
                     validator: InputValidator.requiredField,
@@ -183,7 +190,11 @@ class _EditIteneraryPageState extends State<EditIteneraryPage> {
                   SizedBox(height: AppTheme.defaultMargin),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
+                    children: isLoading ? [
+                      CircularProgressIndicator(
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ] : [
                       ElevatedButton(
                         onPressed: () {
                           Navigator.pop(context);

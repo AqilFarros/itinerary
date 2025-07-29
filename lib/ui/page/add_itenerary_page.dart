@@ -165,7 +165,11 @@ class _AddIteneraryPageState extends State<AddIteneraryPage> {
                   SizedBox(height: AppTheme.defaultMargin),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
+                    children: isLoading ? [
+                      CircularProgressIndicator(
+                        color: Theme.of(context).primaryColor,
+                      ),
+                    ] : [
                       ElevatedButton(
                         onPressed: () {
                           Navigator.pop(context);

@@ -1,7 +1,14 @@
 part of 'widget.dart';
 
 class EventCard extends StatelessWidget {
-  const EventCard({super.key, required this.name, required this.type, required this.location, required this.date, required this.description,});
+  const EventCard({
+    super.key,
+    required this.name,
+    required this.type,
+    required this.location,
+    required this.date,
+    required this.description,
+  });
 
   final String name;
   final String type;

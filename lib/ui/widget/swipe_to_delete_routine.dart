@@ -20,7 +20,7 @@ class _SwipeToDeleteRoutineState extends State<SwipeToDeleteRoutine>
   late AnimationController _fadeController;
   bool _isDismissing = false;
 
-  static const double threshold = 0.3; // swipe 30% layar untuk trigger
+  static const double threshold = 0.3;
 
   @override
   void initState() {
@@ -38,15 +38,7 @@ class _SwipeToDeleteRoutineState extends State<SwipeToDeleteRoutine>
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    // Geser ke kanan saja (delta negatif)
-    // if (details.delta.dx < 0) {
-    //   setState(() {
-    //     _dragExtent += details.delta.dx;
-    //   });
-    // }
-
     setState(() {
-      // Geser hanya sampai ke 0 (tidak ke kanan melebihi awal)
       _dragExtent = (_dragExtent + details.delta.dx).clamp(
         0.0,
         MediaQuery.of(context).size.width,
@@ -61,9 +53,7 @@ class _SwipeToDeleteRoutineState extends State<SwipeToDeleteRoutine>
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Delete Routine?'),
-          content: const Text(
-            'Are you sure want to delete this routine?',
-          ),
+          content: const Text('Are you sure want to delete this routine?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
@@ -105,7 +95,6 @@ class _SwipeToDeleteRoutineState extends State<SwipeToDeleteRoutine>
       onHorizontalDragEnd: _handleDragEnd,
       child: Stack(
         children: [
-          // Background merah
           Positioned.fill(
             child: Container(
               alignment: Alignment.centerLeft,
@@ -113,8 +102,8 @@ class _SwipeToDeleteRoutineState extends State<SwipeToDeleteRoutine>
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(AppTheme.defaultMargin),
                 color: Colors.red.withOpacity(
-                (_dragExtent.abs() / screenWidth).clamp(0.0, 1.0),
-              ),
+                  (_dragExtent.abs() / screenWidth).clamp(0.0, 1.0),
+                ),
               ),
               child: const Text(
                 "Swipe to delete",
@@ -126,7 +115,6 @@ class _SwipeToDeleteRoutineState extends State<SwipeToDeleteRoutine>
             ),
           ),
 
-          // Child dengan efek geser dan fade out
           AnimatedBuilder(
             animation: _fadeController,
             builder: (context, child) {

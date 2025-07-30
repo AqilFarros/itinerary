@@ -18,9 +18,7 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   void initState() {
     if (box.get('birth') != null && box.get('birth') != '') {
-      birthController.text = Helper.formatDate(
-        box.get('birth'),
-      );
+      birthController.text = Helper.formatDate(box.get('birth'));
     }
     if (box.get('gender') != null) {
       selectedGender = box.get('gender');
@@ -98,7 +96,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                       SizedBox(height: AppTheme.defaultMargin),
                       Text(
-                        snapshot.data!['email'],
+                        authService.currentUser!.email!,
                         style: Theme.of(context).textTheme.titleSmall!,
                       ),
                       SizedBox(height: AppTheme.defaultMargin * 2),
@@ -115,7 +113,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           SizedBox(width: AppTheme.defaultMargin),
                           Expanded(
                             child: DropdownButtonFormField(
-                              onChanged: (value) {
+                              onChanged: (value) async {
+                                await box.put('gender', value);
                                 setState(() {
                                   selectedGender = value;
                                 });

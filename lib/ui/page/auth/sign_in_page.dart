@@ -98,7 +98,7 @@ class _SignInPageState extends State<SignInPage> {
                       : [
                           GestureDetector(
                             onTap: () {
-                              signIn();
+                              Navigator.pushReplacementNamed(context, '/sign-up');
                             },
                             child: Text(
                               "Haven't has an account?",

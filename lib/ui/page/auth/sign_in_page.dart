@@ -11,7 +11,7 @@ class _SignInPageState extends State<SignInPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final formKey = GlobalKey<FormState>();
-  // final authService = AuthService();
+  final authService = AuthService();
   bool isLoading = false;
 
   void signIn() async {
@@ -21,10 +21,10 @@ class _SignInPageState extends State<SignInPage> {
           isLoading = true;
         });
 
-        // await authService.signIn(
-        //   email: emailController.text,
-        //   password: passwordController.text,
-        // );
+        await authService.signIn(
+          email: emailController.text,
+          password: passwordController.text,
+        );
 
         if (!mounted) return;
         Navigator.pushReplacementNamed(context, '/home');

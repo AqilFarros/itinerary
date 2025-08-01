@@ -41,7 +41,7 @@ dependencies:
   intl: ^0.20.2
 
 dev_dependencies:
-  mockito: ^5.5.0
+  mocktail: ^1.0.1
   firebase_core_platform_interface: ^6.0.0
   flutter_lints: ^5.0.0
   flutter_test:

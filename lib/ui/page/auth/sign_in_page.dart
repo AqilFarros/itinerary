@@ -1,7 +1,9 @@
 part of '../page.dart';
 
 class SignInPage extends StatefulWidget {
-  const SignInPage({super.key});
+  const SignInPage({super.key, required this.auth});
+
+  final AuthService auth;
 
   @override
   State<SignInPage> createState() => _SignInPageState();
@@ -11,7 +13,6 @@ class _SignInPageState extends State<SignInPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   final formKey = GlobalKey<FormState>();
-  final authService = AuthService();
   bool isLoading = false;
 
   void signIn() async {
@@ -21,7 +22,7 @@ class _SignInPageState extends State<SignInPage> {
           isLoading = true;
         });
 
-        await authService.signIn(
+        await widget.auth.signIn(
           email: emailController.text,
           password: passwordController.text,
         );

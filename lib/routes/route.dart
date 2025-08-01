@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:itinerary/firebase/firebase.dart';
 import 'package:itinerary/ui/page/page.dart';
 
 class RouteGenerator {
@@ -7,7 +8,7 @@ class RouteGenerator {
       case '/':
         return MaterialPageRoute(builder: (_) => WelcomePage());
       case '/sign-in':
-        return MaterialPageRoute(builder: (_) => SignInPage());
+        return MaterialPageRoute(builder: (_) => SignInPage(auth: AuthService(),));
       case '/sign-up':
         return MaterialPageRoute(builder: (_) => SignUpPage());
       case '/profile':

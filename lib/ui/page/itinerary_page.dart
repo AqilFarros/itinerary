@@ -447,7 +447,7 @@ class _ItineraryPageState extends State<ItineraryPage> {
                                                   left: AppTheme.defaultMargin,
                                                 ),
                                                 child: ActivityCard(
-                                                  id: upcoming[index].id,
+                                                  id: expired[index].id,
                                                   itineraryId: widget.id,
                                                   name: expired[index]['name'],
                                                   type: expired[index]['type'],
